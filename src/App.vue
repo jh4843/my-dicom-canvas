@@ -1,7 +1,7 @@
 <template>
   <main id="mainView">
     <div class="main-div">
-      <Report class="main-report-view"></Report>
+      <Viewer class="main-viewer-view"></Viewer>
       <!-- <ReportBuilder class="main-report-builder"></ReportBuilder> -->
     </div>
   </main>
@@ -9,13 +9,13 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import Report from "./components/Report/Report.vue";
+import Viewer from "./components/Viewer/Viewer.vue";
 //import ReportBuilder from "./components/ReportBuilder/ReportBuilder.vue";
 
 export default defineComponent({
   name: "App",
 
-  components: { Report },
+  components: { Viewer },
 
   setup() {
     return {};

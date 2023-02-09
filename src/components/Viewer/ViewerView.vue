@@ -1,5 +1,5 @@
 <template>
-  <div id="report-view" :style="`min-width: ${canvasInfo.width}px; min-height: ${canvasInfo.height}px`">
+  <div id="viewer-view" :style="`min-width: ${canvasInfo.width}px; min-height: ${canvasInfo.height}px`">
     <input
       class="input-button"
       style="border: none"
@@ -8,16 +8,16 @@
       @change="onSelectedFile"
       enctype="multipart/form-data"
     />
-    <div v-if="isShowDropBox" id="report-drop-box-container" class="canvas-container" ref="refDropBoxContainer">
+    <div v-if="isShowDropBox" id="viewer-drop-box-container" class="canvas-container" ref="refDropBoxContainer">
       <div
         :style="`width: ${canvasInfo.width}px; height: ${canvasInfo.height}px`"
-        id="report-drop-box"
+        id="viewer-drop-box"
         ref="refDropBoxElement"
       ></div>
     </div>
-    <div v-else id="report-canvas-container" class="canvas-container" ref="refCanvasContainer">
+    <div v-else id="viewer-canvas-container" class="canvas-container" ref="refCanvasContainer">
       <canvas
-        id="report-canvas"
+        id="viewer-canvas"
         ref="refCanvasElement"
         :width="canvasInfo.width"
         :height="canvasInfo.height"
@@ -62,8 +62,6 @@ const refDropBoxElement = ref(null);
 const refCanvasContainer = ref(null);
 const refCanvasElement = ref(null);
 
-const getDropBoxStyle = computed(() => {});
-
 const canvasContainer = computed(() => {
   return refCanvasContainer.value;
 });
@@ -86,8 +84,8 @@ const showDropbox = (show: boolean): void => {
 
   console.log("showDropBox", show, isOpenedDicomFile.value);
 
-  const boxContainer = document.getElementById("report-drop-box-container");
-  const box = document.getElementById("report-drop-box");
+  const boxContainer = document.getElementById("viewer-drop-box-container");
+  const box = document.getElementById("viewer-drop-box");
 
   if (!box) {
     return;
@@ -148,13 +146,16 @@ const init = () => {
 };
 
 const onSelectedFile = (e: Event) => {
+  e.stopPropagation();
   e.preventDefault();
+
+  console.log("onSelectedFile: ", e.constructor.name);
 
   if (e == undefined || e.target == undefined || e.target.files.length < 1) return;
 
   loadImage(e.target.files[0]);
 
-  console.log("onSelectedFile: ", e, e.target.files[0]);
+  console.log("onSelectedFile: ", e.constructor.name, e, e.target.files[0]);
 };
 
 const onHandleDragOverImage = (e: DragEvent) => {
@@ -339,28 +340,28 @@ onMounted(init);
   height: 10%;
 }
 
-#report-view {
+#viewer-view {
   width: 100%;
   height: 100%;
 
   border: 1px solid red;
 }
 
-#report-canvas {
+#viewer-canvas {
   border: 1px solid blue;
 }
 
-#report-drop-box {
+#viewer-drop-box {
   box-sizing: border-box;
   text-align: center;
   vertical-align: middle;
   /* width: 80%;
   height: 80%; */
 }
-#report-drop-box {
+#viewer-drop-box {
   border: 5px dashed rgba(68, 138, 255, 0.38);
 }
-#report-drop-box.hover {
+#viewer-drop-box.hover {
   border: 5px dashed var(--md-theme-default-primary);
 }
 

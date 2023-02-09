@@ -1,17 +1,17 @@
 <template>
-  <div class="report-container">
-    <ReportView></ReportView>
+  <div class="viewer-container">
+    <ViewerView></ViewerView>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import ReportView from "./ReportView.vue";
+import ViewerView from "./ViewerView.vue";
 
 export default defineComponent({
   // eslint-disable-next-line vue/multi-word-component-names
-  name: "Report",
-  components: { ReportView },
+  name: "Viewer",
+  components: { ViewerView },
 
   setup() {
     return {};
@@ -20,7 +20,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.report-container {
+.viewer-container {
   width: 100%;
   height: 100%;
 }
