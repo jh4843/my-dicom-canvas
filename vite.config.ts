@@ -8,6 +8,9 @@ import vue from "@vitejs/plugin-vue";
 export default defineConfig({
   //plugins: [vue(), viteSingleFile()],
   plugins: [vue()],
+  esbuild: {
+    target: "es6",
+  },
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),

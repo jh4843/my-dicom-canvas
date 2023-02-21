@@ -1,3 +1,11 @@
+import type ImageSize from "@/components/Image/ImageSize";
+
+export enum eImageDimension {
+  image_dimension_invalid,
+  image_dimension_2d,
+  image_dimension_3d,
+}
+
 export enum eImageSourceType {
   image_source_type_img_file,
   image_source_type_dcm_file,
@@ -5,39 +13,75 @@ export enum eImageSourceType {
   image_source_type_url = 10,
 }
 
+export enum eImageContentType {
+  image_content_type_invalid,
+  image_content_type_text,
+  image_content_type_array_buffer,
+  image_content_type_data_url,
+}
+
+export type tImageBufferType = Uint8Array | Int8Array | Uint16Array | Int16Array | Uint32Array | Int32Array | null;
+
+export interface IImageDisplayValue {
+  r: number;
+  g: number;
+  b: number;
+  alpha?: number;
+}
+
+export interface IImageMetaData {
+  bitsStored?: number;
+  bitsAllocated?: number;
+  isSigned?: boolean;
+  samplesPerPixel?: number;
+  planarConfiguration?: number;
+  sliceSize?: ImageSize;
+  numberOfFiles?: number;
+  windowPresets?: object;
+}
+
+export interface IDomImageValue {
+  value: string;
+}
+
+export interface IDomImageInfo {
+  [index: string]: IDomImageValue;
+}
+
 export interface ICommonImageInfo {
-  srcType: eImageSourceType;
-  srcName: string;
+  type: eImageSourceType;
+  name: string;
 
   width: number;
   height: number;
 }
 
-export class CommonImage implements ICommonImageInfo {
-  srcType: eImageSourceType;
-  srcName: string;
+export class CommonImage {
+  _data: ImageData | undefined;
+  _info: ICommonImageInfo;
 
-  width: number;
-  height: number;
-
-  constructor(
-    srcType: eImageSourceType = eImageSourceType.image_source_type_img_file,
-    srcName: string = "",
-    width: number = 0,
-    height: number = 0
-  ) {
-    this.srcType = srcType;
-    this.srcName = srcName;
-
-    this.width = width;
-    this.height = height;
+  constructor(info: ICommonImageInfo) {
+    this._info = info;
+    this._data = undefined;
   }
 
-  set(canvas: CommonImage) {
-    this.srcType = canvas.srcType;
-    this.srcName = canvas.srcName;
+  get data() {
+    return this._data;
+  }
 
-    this.width = canvas.width;
-    this.height = canvas.height;
+  set data(dt) {
+    this._data = dt;
+  }
+
+  get info() {
+    return this._info;
+  }
+
+  set info(information) {
+    this._info = information;
+  }
+
+  setImageInfo(info: ICommonImageInfo) {
+    this._info = info;
   }
 }

@@ -21,8 +21,8 @@
         ref="refCanvasElement"
         :width="canvasInfo.width"
         :height="canvasInfo.height"
-        @mousedown="onHandleMouseDown"
-        @mousemove="onHandleMouseMove"
+        @mousedown="onMouseDown"
+        @mousemove="onMouseMove"
       >
         Invalid Main Canvas
       </canvas>
@@ -32,8 +32,9 @@
 
 <script setup lang="ts">
 import { onMounted, ref, reactive, computed } from "vue";
-import { CommonImage, type ICommonImageInfo, eImageSourceType } from "@/types/Image";
-import { CommonCanvas, type ICommonCanvasInfo } from "@/types/Canvas";
+import { CommonImage, eImageSourceType } from "@/types/Image";
+import { CommonCanvas } from "@/types/Canvas";
+import FileLoaderManager from "@/components/IO/FileLoaderManager";
 
 interface Props {
   canvasWidth?: number;
@@ -53,7 +54,9 @@ const props = withDefaults(defineProps<Props>(), {
 const curPointPositionX = ref(0);
 const curPointPositionY = ref(0);
 
-const imageInfo: CommonImage = reactive(new CommonImage(eImageSourceType.image_source_type_img_file, "", 0, 0));
+const imageInfo: CommonImage = reactive(
+  new CommonImage({ type: eImageSourceType.image_source_type_img_file, name: "", width: 0, height: 0 })
+);
 const canvasInfo: CommonCanvas = reactive(new CommonCanvas(0, 0, props.canvasWidth, props.canvasHeight, 1));
 
 // refs
@@ -79,8 +82,8 @@ const isShowDropBox = computed(() => {
 const showDropbox = (show: boolean): void => {
   isOpenedDicomFile.value = !show;
 
-  imageInfo.srcType = eImageSourceType.image_source_type_img_file;
-  imageInfo.srcName = "";
+  imageInfo.info.type = eImageSourceType.image_source_type_img_file;
+  imageInfo.info.name = "";
 
   console.log("showDropBox", show, isOpenedDicomFile.value);
 
@@ -92,21 +95,21 @@ const showDropbox = (show: boolean): void => {
   }
 
   if (show) {
-    box.addEventListener("dragover", onHandleDragOverImage);
+    box.addEventListener("dragover", onDragOverImage);
     // box.addEventListener('dragleave', this.onBoxDragLeave)
-    box.addEventListener("drop", onHandleDropImage);
+    box.addEventListener("drop", onDropImage);
 
     if (boxContainer) {
-      boxContainer.removeEventListener("dragover", onHandleDragOverImage);
-      boxContainer.removeEventListener("drop", onHandleDropImage);
+      boxContainer.removeEventListener("dragover", onDragOverImage);
+      boxContainer.removeEventListener("drop", onDropImage);
     }
   } else {
-    box.removeEventListener("dragover", onHandleDragOverImage);
-    box.removeEventListener("drop", onHandleDropImage);
+    box.removeEventListener("dragover", onDragOverImage);
+    box.removeEventListener("drop", onDropImage);
 
     if (boxContainer) {
-      boxContainer.addEventListener("dragover", onHandleDragOverImage);
-      boxContainer.addEventListener("drop", onHandleDropImage);
+      boxContainer.addEventListener("dragover", onDragOverImage);
+      boxContainer.addEventListener("drop", onDropImage);
     }
   }
 };
@@ -153,17 +156,21 @@ const onSelectedFile = (e: Event) => {
 
   if (e == undefined || e.target == undefined || e.target.files.length < 1) return;
 
-  loadImage(e.target.files[0]);
+  const fileLoaderManager = new FileLoaderManager();
+
+  console.log(fileLoaderManager);
+
+  fileLoaderManager.loadFiles(e.target.files);
 
   console.log("onSelectedFile: ", e.constructor.name, e, e.target.files[0]);
 };
 
-const onHandleDragOverImage = (e: DragEvent) => {
+const onDragOverImage = (e: DragEvent) => {
   //const eventDataTransfer = e.dataTransfer;
   e.stopPropagation();
   e.preventDefault();
 
-  //console.log("onHandleDragOverImage", e.dataTransfer);
+  //console.log("onDragOverImage", e.dataTransfer);
 };
 
 const loadLocalFile = (file: string) => {
@@ -204,11 +211,11 @@ const loadImage = (src: File) => {
 const drawImage = (img: HTMLImageElement) => {
   console.log("draw Image: ", img.constructor.name);
 
-  imageInfo.srcType = eImageSourceType.image_source_type_img_file;
-  imageInfo.srcName = img.src;
+  imageInfo.info.type = eImageSourceType.image_source_type_img_file;
+  imageInfo.info.name = img.src;
 
-  imageInfo.width = img.width;
-  imageInfo.height = img.height;
+  imageInfo.info.width = img.width;
+  imageInfo.info.height = img.height;
 
   let ratio = 1;
   const mainCanvasDiv = canvasContainer.value as HTMLDivElement | null;
@@ -234,40 +241,42 @@ const drawImage = (img: HTMLImageElement) => {
     return;
   }
 
-  if (imageInfo.width < imageInfo.height) {
-    ratio = _canvasHeight / imageInfo.height;
+  if (imageInfo.info.width < imageInfo.info.height) {
+    ratio = _canvasHeight / imageInfo.info.height;
   } else {
-    ratio = _canvasWidth / imageInfo.width;
+    ratio = _canvasWidth / imageInfo.info.width;
   }
 
-  var centerShiftX = (_canvasWidth - imageInfo.width * ratio) / 2;
-  var centerShiftY = (_canvasHeight - imageInfo.height * ratio) / 2;
+  var centerShiftX = (_canvasWidth - imageInfo.info.width * ratio) / 2;
+  var centerShiftY = (_canvasHeight - imageInfo.info.height * ratio) / 2;
 
-  let width = imageInfo.width * ratio;
-  let height = imageInfo.height * ratio;
+  let width = imageInfo.info.width * ratio;
+  let height = imageInfo.info.height * ratio;
 
   if (ctxMainCanvasElement != undefined && ctxMainCanvasElement != null) {
     ctxMainCanvasElement.drawImage(
       img,
       0,
       0,
-      imageInfo.width,
-      imageInfo.height,
+      imageInfo.info.width,
+      imageInfo.info.height,
       centerShiftX,
       centerShiftY,
       width,
       height
     );
 
-    console.log("draw: ", imageInfo.width, imageInfo.height);
+    imageInfo.data = ctxMainCanvasElement.getImageData(0, 0, imageInfo.info.width, imageInfo.info.height);
+
+    console.log("draw: ", imageInfo.info.width, imageInfo.info.height, imageInfo.data);
 
     var dataURI = mainCanvasElement?.toDataURL("image/jpeg");
 
-    console.log("Draw image: ", imageInfo.width, imageInfo.height, ratio, dataURI);
+    console.log("Draw image: ", imageInfo.info.width, imageInfo.info.height, ratio, dataURI);
   }
 };
 
-const onHandleDropImage = (e: DragEvent) => {
+const onDropImage = (e: DragEvent) => {
   //const eventDataTransfer = e.dataTransfer;
   e.stopPropagation();
   e.preventDefault();
@@ -282,6 +291,7 @@ const onHandleDropImage = (e: DragEvent) => {
     if (reader.result != null) {
       if (typeof reader.result === "string") {
         img.src = reader.result;
+        console.log("img: ", img);
       } else {
         console.log("type error: ", reader.result);
       }
@@ -302,21 +312,21 @@ const onHandleDropImage = (e: DragEvent) => {
   //showDropbox(false);
 };
 
-const onHandleMouseDown = (e: MouseEvent): void => {
+const onMouseDown = (e: MouseEvent): void => {
   curPointPositionX.value = e.clientX;
   curPointPositionY.value = e.clientY;
 
-  console.log(`onHandleMouseDown) Cure Pos X: ${curPointPositionX.value} Y: ${curPointPositionY.value}`);
+  console.log(`onMouseDown) Cure Pos X: ${curPointPositionX.value} Y: ${curPointPositionY.value}`);
 
   //console.log(e);
 };
 
-const onHandleMouseMove = (e: MouseEvent): void => {
+const onMouseMove = (e: MouseEvent): void => {
   curPointPositionX.value = e.clientX;
   curPointPositionY.value = e.clientY;
 
   // console.log(
-  //   `onHandleMouseMove) Cure Pos X: ${curPointPositionX.value} Y: ${curPointPositionY.value}`
+  //   `onMouseMove) Cure Pos X: ${curPointPositionX.value} Y: ${curPointPositionY.value}`
   // );
 };
 
