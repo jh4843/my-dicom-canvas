@@ -74,11 +74,6 @@ export default class FileLoaderManager implements ILoaderController {
   loadFileData(data: Array<File>, loader: FileLoader, loadType: eEventLoadType, options?: ILoaderOptions) {
     const loadId = this.getNextLoadId();
 
-    const eventInfo: IEventInfo = {
-      id: loadId,
-      loadType: loadType,
-    };
-
     loader.onloadstart = (event) => {
       console.log(`FileLoaderManager::onloadstart `, event);
 
@@ -88,28 +83,26 @@ export default class FileLoaderManager implements ILoaderController {
         isFirstItem: true,
       };
 
-      augmentCallbackEvent(this.onloadstart, eventInfo)(event);
-
       this.onloadstart(event);
     };
 
     loader.onprogress = (event) => {
       console.log(`FileLoaderManager::::onprogress `, event);
-      augmentCallbackEvent(this.onloadstart, eventInfo)(event);
+      this.onloadstart(event);
     };
 
     loader.onloaditem = (event) => {
       console.log(`FileLoaderManager::onloaditem `, event);
-      augmentCallbackEvent(this.onloadend, eventInfo)(event);
+      this.onloadend(event);
     };
 
     loader.onerror = (event) => {
       console.log(`FileLoaderManager::onerror: `, event);
-      augmentCallbackEvent(this.onerror, eventInfo)(event);
+      this.onerror(event);
     };
     loader.onabort = (event) => {
       console.log(`FileLoaderManager::onabort: `, event);
-      augmentCallbackEvent(this.onabort, eventInfo)(event);
+      this.onabort(event);
     };
 
     // launch load

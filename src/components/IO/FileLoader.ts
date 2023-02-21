@@ -108,12 +108,24 @@ export default class FileLoader extends BaseLoader {
     if (typeof loader.onloaditem === "undefined") {
       // handle loaditem locally
       console.log("FileLoader::load - local");
-      loader.onload = this.addLoadItem;
+      loader.onload = (event: myType.IEventInfo) => {
+        console.log(`${this.constructor.name}::addLoadItem`, event);
+        this.onloaditem(event);
+      }; //this.addLoadItem;
+      loader.onloaditem = this.addLoad;
     } else {
       console.log("FileLoader::load - remote");
 
-      loader.onloaditem = this.onloaditem;
-      loader.onload = this.addLoad;
+      loader.onload = this.addLoadItem;
+
+      // loader.onload = (event: myType.IEventInfo) => {
+      //   console.log(`${this.constructor.name}::addLoadItem`, event);
+      //   this.onloaditem(event);
+      // }; //this.addLoadItem;
+      loader.onloaditem = this.addLoad;
+
+      // loader.onloaditem = this.onloaditem;
+      // loader.onload = this.addLoad;
     }
     loader.onloadend = this.addLoadend;
     loader.onerror = this.onerror;
@@ -206,11 +218,11 @@ export default class FileLoader extends BaseLoader {
    * @param {object} event The load data event.
    * @private
    */
-  addLoadItem(event: myType.IEventInfo) {
-    console.log(`FileLoader::addLoadItem`, event);
+  addLoadItem = (event: myType.IEventInfo) => {
+    console.log(`${this.constructor.name}::addLoadItem`, event);
     this.onloaditem(event);
-    this.addLoad();
-  }
+    //this.addLoad();
+  };
 
   /**
    * Increment the number of loaded data
@@ -219,18 +231,15 @@ export default class FileLoader extends BaseLoader {
    * @param {object} _event The load data event.
    * @private
    */
-  addLoad() {
-    console.log(`FileLoader::addLoad`);
-    this._reservedLoadCount++;
-    // call self.onload when all is loaded
-    // (not using the input event since it is not the
-    //   general load)
-    if (this._reservedLoadCount === this._inputFiles.length) {
-      // this.onload({
-      //   source: this._inputFiles
-      // });
-    }
-  }
+  addLoad = (event: myType.IEventInfo) => {
+    console.log(`FileLoader::addLoad`, event);
+    // this._reservedLoadCount++;
+    // if (this._reservedLoadCount === this._inputFiles.length) {
+    //   this.onload({
+    //     source: this._inputFiles
+    //   });
+    // }
+  };
 
   /**
    * Increment the counter of load end events
@@ -239,7 +248,7 @@ export default class FileLoader extends BaseLoader {
    * @param {object} _event The load end event.
    * @private
    */
-  addLoadend(_event: myType.IEventInfo) {
+  addLoadend = (_event: myType.IEventInfo) => {
     console.log(`FileLoader::addLoadend`, this._endLoadCount);
     this._endLoadCount++;
     // call self.onloadend when all is run
@@ -251,7 +260,7 @@ export default class FileLoader extends BaseLoader {
         src: this._inputFiles,
       });
     }
-  }
+  };
 
   /**
    * Handle a load start event.
@@ -260,14 +269,14 @@ export default class FileLoader extends BaseLoader {
    * @param {object} _event The load start event.
    */
 
-  onloadstart(_event: myType.IEventInfo) {}
+  onloadstart = (_event: myType.IEventInfo) => {};
   /**
    * Handle a load progress event.
    * Default does nothing.
    *
    * @param {object} _event The progress event.
    */
-  onprogress(_event: myType.IEventInfo) {}
+  onprogress = (_event: myType.IEventInfo) => {};
   /**
    * Handle a load item event.
    * Default does nothing.
@@ -275,7 +284,7 @@ export default class FileLoader extends BaseLoader {
    * @param {object} _event The load item event fired
    *   when a file item has been loaded successfully.
    */
-  onloaditem(_event: myType.IEventInfo) {}
+  onloaditem = (_event: myType.IEventInfo) => {};
   /**
    * Handle a load event.
    * Default does nothing.
@@ -283,7 +292,7 @@ export default class FileLoader extends BaseLoader {
    * @param {object} _event The load event fired
    *   when a file has been loaded successfully.
    */
-  onload(_event: myType.IEventInfo) {}
+  onload = (_event: myType.IEventInfo) => {};
   /**
    * Handle a load end event.
    * Default does nothing.
@@ -291,19 +300,19 @@ export default class FileLoader extends BaseLoader {
    * @param {object} _event The load end event fired
    *  when a file load has completed, successfully or not.
    */
-  onloadend(_event: myType.IEventInfo) {}
+  onloadend = (_event: myType.IEventInfo) => {};
   /**
    * Handle an error event.
    * Default does nothing.
    *
    * @param {object} _event The error event.
    */
-  onerror(_event: myType.IEventInfo) {}
+  onerror = (_event: myType.IEventInfo) => {};
   /**
    * Handle an abort event.
    * Default does nothing.
    *
    * @param {object} _event The abort event.
    */
-  onabort(_event: myType.IEventInfo) {}
+  onabort = (_event: myType.IEventInfo) => {};
 }

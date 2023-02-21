@@ -105,6 +105,7 @@ export default class ImageLoader extends BaseLoader {
    * @param {object} _event The load start event.
    */
   onloadstart(_event) {}
+
   /**
    * Handle a progress event.
    * Default does nothing.

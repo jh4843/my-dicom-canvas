@@ -158,9 +158,17 @@ const onSelectedFile = (e: Event) => {
 
   const fileLoaderManager = new FileLoaderManager();
 
-  console.log(fileLoaderManager);
-
   fileLoaderManager.loadFiles(e.target.files);
+
+  fileLoaderManager.onloadend = (event) => {
+    if (event.src == undefined) {
+      console.log("onloadend) invalid src", event.src);
+      return;
+    }
+
+    loadImage(event.src);
+    console.log("onloadend) complete", event);
+  };
 
   console.log("onSelectedFile: ", e.constructor.name, e, e.target.files[0]);
 };

@@ -74,16 +74,16 @@ export default class DomReader {
     const imageData = ctx.getImageData(0, 0, width, height);
 
     // image properties
-    // const info: myType.IDomImageInfo = {};
-    // if (typeof domImage.origin === "string") {
-    //   info["origin"] = { value: domImage.origin };
-    // } else {
-    //   info["fileName"] = { value: domImage.origin.name };
-    //   info["fileType"] = { value: domImage.origin.type };
-    //   info["fileLastModifiedDate"] = { value: domImage.origin.lastModifiedDate };
-    // }
-    // info["imageWidth"] = { value: width };
-    // info["imageHeight"] = { value: height };
+    const info: myType.IImageMetaInfo = {};
+    if (typeof domImage.origin === "string") {
+      info["origin"] = { value: domImage.origin };
+    } else {
+      info["fileName"] = { value: domImage.origin.name };
+      info["fileType"] = { value: domImage.origin.type };
+      info["fileLastModifiedDate"] = { value: domImage.origin.lastModifiedDate };
+    }
+    info["imageWidth"] = { value: width };
+    info["imageHeight"] = { value: height };
 
     const sliceIndex = domImage.index ? domImage.index : 0;
     // info["imageUid"] = { value: sliceIndex };
@@ -92,12 +92,14 @@ export default class DomReader {
     const imageBuffer = this.imageDataToBuffer(imageData);
     const image = this.getDefaultImage(width, height, sliceIndex, imageBuffer, 1, sliceIndex);
 
+    console.log(`DomReader ${width}, ${height}, ${imageData.data.length}`);
+
     console.log(`DomReader::getViewFromDOMImage`, image);
 
     const res: myType.IEventInfo = {
       data: {
         image: image,
-        //info: info,
+        info: info,
       },
       src: origin,
     };

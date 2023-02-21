@@ -44,8 +44,8 @@ export interface IDomImageValue {
   value: string;
 }
 
-export interface IDomImageInfo {
-  [index: string]: IDomImageValue;
+export interface IImageMetaInfo {
+  [key: string]: IDomImageValue;
 }
 
 export interface ICommonImageInfo {

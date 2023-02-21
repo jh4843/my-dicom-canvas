@@ -1,4 +1,5 @@
 import type MyImage from "@/components/Image/MyImage";
+import type { IImageMetaInfo } from "@/types/Image";
 
 export enum eEventType {
   event_type_invalid,
@@ -35,6 +36,7 @@ export enum eEventLoadType {
 
 export interface IEventData {
   image?: MyImage;
+  info?: IImageMetaInfo;
 }
 
 export interface IEventInfo {
