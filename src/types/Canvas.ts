@@ -1,4 +1,4 @@
-export interface ICommonCanvasInfo {
+export interface iCommonCanvasInfo {
   x: number;
   y: number;
   //
@@ -8,7 +8,7 @@ export interface ICommonCanvasInfo {
   ratio: number;
 }
 
-export class CommonCanvas implements ICommonCanvasInfo {
+export class CommonCanvas implements iCommonCanvasInfo {
   x: number;
   y: number;
   //

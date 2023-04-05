@@ -1,60 +1,50 @@
-import * as myType from "@/types";
-
-export interface ILoaderOptions {
-  numberOfFiles?: number;
-  defaultCharacterSet?: string;
-}
-
-export enum eLoaderStatus {
-  loader_status_none = 0,
-  loader_status_loadstart = 10,
-  loader_status_loading,
-  loader_status_loadend,
-
-  loader_status_aborted = 20,
-}
+import * as MyType from "@/types";
 
 export default class BaseLoader {
-  protected _options?: ILoaderOptions;
-  protected _loadStatus: eLoaderStatus;
+  protected _options?: MyType.iLoaderOptions;
+  protected _loadStatus: MyType.eLoaderStatus;
 
-  onloadstart?(_event: myType.IEventInfo): void;
-  onprogress?(_event: myType.IEventInfo): void;
-  onloaditem?(_event: myType.IEventInfo): void;
-  onload?(_event: myType.IEventInfo): void;
-  onloadend?(_event: myType.IEventInfo): void;
-  onerror?(_event: myType.IEventInfo): void;
-  onabort?(_event: myType.IEventInfo): void;
+  onloadstart?(_event: MyType.iEventInfo): void;
+  onprogress?(_event: MyType.iEventInfo): void;
+  onloaditem?(_event: MyType.iEventInfo): void;
+  onload?(_event: MyType.iEventInfo): void;
+  onloadend?(_event: MyType.iEventInfo): void;
+  onerror?(_event: MyType.iEventInfo): void;
+  onabort?(_event: MyType.iEventInfo): void;
 
   constructor() {
     this._options = {
       numberOfFiles: 0,
       defaultCharacterSet: "",
     };
-    this._loadStatus = eLoaderStatus.loader_status_none;
+    this._loadStatus = MyType.eLoaderStatus.loader_status_none;
   }
 
-  set loadStatus(status: eLoaderStatus) {
+  set loadStatus(status: MyType.eLoaderStatus) {
     this._loadStatus = status;
   }
 
-  get loadStatus(): eLoaderStatus {
+  get loadStatus(): MyType.eLoaderStatus {
     return this._loadStatus;
+  }
+
+  getType(): MyType.eLoaderObjectType {
+    return MyType.eLoaderObjectType.loader_object_type_base;
   }
 
   canLoadFile(file: File): boolean {
     return false;
   }
 
-  loadFileAs(): myType.eImageContentType {
-    return myType.eImageContentType.image_content_type_invalid;
+  loadFileAs(): MyType.eImageContentType {
+    return MyType.eImageContentType.image_content_type_invalid;
   }
 
-  loadUrlAs(): myType.eImageContentType {
-    return myType.eImageContentType.image_content_type_invalid;
+  loadUrlAs(): MyType.eImageContentType {
+    return MyType.eImageContentType.image_content_type_invalid;
   }
 
-  setOptions(option: ILoaderOptions | undefined) {
+  setOptions(option: MyType.iLoaderOptions | undefined) {
     this._options = option;
   }
 
@@ -63,7 +53,7 @@ export default class BaseLoader {
   }
 
   isLoading(): boolean {
-    return this._loadStatus == eLoaderStatus.loader_status_loading ? true : false;
+    return this._loadStatus == MyType.eLoaderStatus.loader_status_loading ? true : false;
   }
 
   // load

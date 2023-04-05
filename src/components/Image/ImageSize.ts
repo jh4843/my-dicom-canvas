@@ -1,4 +1,4 @@
-import * as myType from "@/types";
+import * as MyType from "@/types";
 import ImageDemension from "./ImageDemension";
 
 export default class ImageSize extends ImageDemension {
@@ -7,7 +7,7 @@ export default class ImageSize extends ImageDemension {
   private _depth?: number; // for 3D
 
   constructor(width: number, height: number, depth?: number) {
-    super(depth == undefined ? myType.eImageDimension.image_dimension_2d : myType.eImageDimension.image_dimension_3d);
+    super(depth == undefined ? MyType.eImageDimension.image_dimension_2d : MyType.eImageDimension.image_dimension_3d);
 
     this._width = width;
     this._height = height;
@@ -36,14 +36,26 @@ export default class ImageSize extends ImageDemension {
     return this._width;
   }
 
+  set width(w: number) {
+    this._width = w;
+  }
+
   get height(): number {
     return this._height;
+  }
+
+  set height(h: number) {
+    this._height = h;
   }
 
   get depth(): number {
     if (this._depth == undefined) return 1.0;
 
     return this._depth;
+  }
+
+  set depth(d: number) {
+    this._depth = d;
   }
 
   length(): number {
@@ -89,13 +101,13 @@ export default class ImageSize extends ImageDemension {
   }
 
   checkValidValue(): boolean {
-    if (this.imageDimension == myType.eImageDimension.image_dimension_invalid) return false;
+    if (this.imageDimension == MyType.eImageDimension.image_dimension_invalid) return false;
 
     if (!this._valueCheck(this.width)) return false;
 
     if (!this._valueCheck(this.height)) return false;
 
-    if (this.imageDimension == myType.eImageDimension.image_dimension_3d) {
+    if (this.imageDimension == MyType.eImageDimension.image_dimension_3d) {
       if (!this._valueCheck(this.depth)) return false;
     }
 
@@ -127,7 +139,7 @@ export default class ImageSize extends ImageDemension {
 
     if (this.height != size.height) return false;
 
-    if (this.imageDimension == myType.eImageDimension.image_dimension_3d) {
+    if (this.imageDimension == MyType.eImageDimension.image_dimension_3d) {
       if (this._depth != size._depth) return false;
     }
 

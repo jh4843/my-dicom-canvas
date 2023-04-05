@@ -1,7 +1,7 @@
-import type { IEventInfo, eEventType } from "@/types/Event";
+import type { iEventInfo, eEventType } from "@/types/Event";
 
 export const augmentCallbackEvent = (callback: Function, source: object): Function => {
-  return function (event: IEventInfo) {
+  return function (event: iEventInfo) {
     event.src = source;
     callback(event);
   };
@@ -35,7 +35,7 @@ export class ListenerHandler {
     }
   }
 
-  fireEvent(event: IEventInfo) {
+  fireEvent(event: iEventInfo) {
     // check if they are listeners for the event type
     if (this._listeners[event.type] === undefined) {
       return;

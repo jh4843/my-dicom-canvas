@@ -1,4 +1,4 @@
-import type * as myType from "@/types";
+import type * as MyType from "@/types";
 import ImageSize from "./ImageSize";
 import ImageSpacing from "./ImageSpacing";
 import ImageGeometry from "./ImageGeometry";
@@ -26,11 +26,11 @@ export default class DomReader {
     width: number,
     height: number,
     sliceIndex: number,
-    imageBuffer: myType.tImageBufferType,
+    imageBuffer: MyType.tImageBufferType,
     numberOfFrames: number,
     imageUid: string,
     // when use 3D demension
-    //imageDemension: myType.eImageDimension = myType.eImageDimension.image_dimension_2d,
+    //imageDemension: MyType.eImageDimension = MyType.eImageDimension.image_dimension_2d,
     depth?: number
   ) {
     // image size
@@ -42,11 +42,10 @@ export default class DomReader {
     const origin = new Point3D(0, 0, sliceIndex);
     // create image
     const geometry = new ImageGeometry(origin, imageSize, imageSpacing);
-    console.log("getDefaultImage: ", geometry);
     const image = new MyImage(geometry, imageBuffer, [imageUid]);
     image.setPhotometricInterpretation("RGB");
     // meta information
-    const meta: myType.IImageMetaData = {};
+    const meta: MyType.iImageMetaData = {};
     meta.bitsStored = 8;
     if (typeof numberOfFrames !== "undefined") {
       meta.numberOfFiles = numberOfFrames;
@@ -74,16 +73,17 @@ export default class DomReader {
     const imageData = ctx.getImageData(0, 0, width, height);
 
     // image properties
-    const info: myType.IImageMetaInfo = {};
+    const info: MyType.iImageMetaInfo = {};
     if (typeof domImage.origin === "string") {
-      info["origin"] = { value: domImage.origin };
+      info.origin = domImage.origin;
     } else {
-      info["fileName"] = { value: domImage.origin.name };
-      info["fileType"] = { value: domImage.origin.type };
-      info["fileLastModifiedDate"] = { value: domImage.origin.lastModifiedDate };
+      info.fileName = domImage.origin.name;
+      info.fileType = domImage.origin.type;
+      info.fileLastModifiedDate = domImage.origin.lastModifiedDate;
     }
-    info["imageWidth"] = { value: width };
-    info["imageHeight"] = { value: height };
+
+    info.imageWidth = width;
+    info.imageHeight = height;
 
     const sliceIndex = domImage.index ? domImage.index : 0;
     // info["imageUid"] = { value: sliceIndex };
@@ -96,7 +96,7 @@ export default class DomReader {
 
     console.log(`DomReader::getViewFromDOMImage`, image);
 
-    const res: myType.IEventInfo = {
+    const res: MyType.iEventInfo = {
       data: {
         image: image,
         info: info,

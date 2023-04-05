@@ -2,10 +2,10 @@ import type ImageGeometry from "./ImageGeometry";
 import MathIndex from "@/math/MathIndex";
 import type { Point3D } from "@/math/Point";
 import RescaleSlopeAndIntercept from "./RescaleSlopeAndIntercept";
-import type * as myType from "@/types";
+import type * as MyType from "@/types";
 import * as myUtils from "@/utils";
 import DicomParser from "@/components/Dicom/DicomParser";
-import { type IEventInfo, eEventType } from "@/types";
+import { type iEventInfo, eEventType } from "@/types";
 
 export const getSliceIndex = (volumeGeometry: ImageGeometry, sliceGeometry: ImageGeometry): MathIndex => {
   // possible time
@@ -30,9 +30,11 @@ export const getSliceIndex = (volumeGeometry: ImageGeometry, sliceGeometry: Imag
 
 export default class MyImage {
   // buffer
-  private _buffer: myType.tImageBufferType;
+  private _buffer: MyType.tImageBufferType;
 
-  public get buffer(): myType.tImageBufferType {
+  private _meta: MyType.iImageMetaData = {};
+
+  public get buffer(): MyType.tImageBufferType {
     return this._buffer;
   }
 
@@ -57,16 +59,15 @@ export default class MyImage {
 
   private _numberOfComponents: number = 0;
 
-  private _meta: myType.IImageMetaData = {};
-
-  private _index: MathIndex;
+  private _index: MathIndex | undefined;
 
   private _listenerHandler = new myUtils.ListenerHandler();
 
-  constructor(geometry: ImageGeometry, buffer: myType.tImageBufferType, imageUids: Array<string>) {
+  constructor(geometry: ImageGeometry, buffer: MyType.tImageBufferType, imageUids: Array<string>) {
     this._geometry = geometry;
     this._buffer = buffer;
     const imgSize = geometry.getSize();
+    this._index = undefined;
 
     if (buffer != null) {
       this._numberOfComponents = buffer.length / imgSize.getTotalSize();
@@ -190,7 +191,7 @@ export default class MyImage {
    *
    * @returns {object} The meta information of the image.
    */
-  getMeta(): myType.IImageMetaData {
+  getMeta(): MyType.iImageMetaData {
     return this._meta;
   }
   /**
@@ -198,7 +199,7 @@ export default class MyImage {
    *
    * @param {object} rhs The meta information of the image.
    */
-  setMeta(rhs: myType.IImageMetaData) {
+  setMeta(rhs: MyType.iImageMetaData) {
     this._meta = rhs;
   }
 
@@ -207,12 +208,12 @@ export default class MyImage {
     return this._buffer[offset];
   }
 
-  getOffsets(value: number | myType.IImageDisplayValue) {
+  getOffsets(value: number | MyType.iImageDisplayValue) {
     // value to array
     const val: Array<number> = [];
     if (typeof value == "number" && this._numberOfComponents === 1) {
       val.push(value);
-    } else if (this._numberOfComponents === 3 && typeof value !== "object") {
+    } else if (this._numberOfComponents === 3 && typeof value !== "number") {
       val.push(value.r);
       val.push(value.g);
       val.push(value.b);
@@ -250,7 +251,7 @@ export default class MyImage {
     // clone the image buffer
     const clonedBuffer = this.buffer.slice(0);
     // create the image copy
-    const copy = new Image(this._geometry, clonedBuffer, this._imageUids);
+    const copy = new MyImage(this._geometry, clonedBuffer, this._imageUids);
     // copy the RSI(s)
     if (this._isConstantRSI) {
       const rsi = this.getRescaleSlopeAndIntercept(0);
@@ -303,7 +304,7 @@ export default class MyImage {
     // create new
   }
 
-  appendSlice(rhs: Image) {
+  appendSlice(rhs: MyImage) {
     // check input
     if (rhs === null) {
       throw new Error("Cannot append null slice");
@@ -405,41 +406,41 @@ export default class MyImage {
     this._imageUids.splice(fullSliceIndex, 0, rhs.getImageUid());
 
     // [TODO]
-    // update window presets
-    // if (this._meta.windowPresets === undefined) {
-    //   const windowPresets = this._meta.windowPresets;
-    //   const rhsPresets = rhs.getMeta().windowPresets;
-    //   if (rhsPresets !== undefined && rhsPresets.length > 0) {
-    //     const keys = Object.keys(rhsPresets);
-    //     let pkey = null;
-    //     for (let i = 0; i < keys.length; ++i) {
-    //       pkey = keys[i];
-    //       const rhsPreset = rhsPresets[pkey];
-    //       const windowPreset = windowPresets[pkey];
-    //       if (typeof windowPreset !== "undefined") {
-    //         // if not set or false, check perslice
-    //         if (typeof windowPreset.perslice === "undefined" || windowPreset.perslice === false) {
-    //           // if different preset.wl, mark it as perslice
-    //           if (!windowPreset.wl[0].equals(rhsPreset.wl[0])) {
-    //             windowPreset.perslice = true;
-    //             // fill wl array with copy of wl[0]
-    //             // (loop on number of images minus the existing one)
-    //             for (let j = 0; j < numberOfImages - 1; ++j) {
-    //               windowPreset.wl.push(windowPreset.wl[0]);
-    //             }
-    //           }
-    //         }
-    //         // store (first) rhs preset.wl if needed
-    //         if (typeof windowPreset.perslice !== "undefined" && windowPreset.perslice === true) {
-    //           windowPresets[pkey].wl.splice(fullSliceIndex, 0, rhsPreset.wl[0]);
-    //         }
-    //       } else {
-    //         // if not defined (it should be), store all
-    //         windowPresets[pkey] = rhsPresets[pkey];
-    //       }
-    //     }
-    //   }
-    // }
+    //update window presets
+    if (this._meta.windowPresets !== undefined) {
+      const windowPresets: MyType.iWindowPresets[] = this._meta.windowPresets;
+      const rhsPresets = rhs.getMeta().windowPresets;
+      if (windowPresets !== undefined && rhsPresets !== undefined && rhsPresets.length > 0) {
+        const keys = Object.keys(rhsPresets);
+        let pkey = null;
+        for (let i = 0; i < keys.length; ++i) {
+          pkey = keys[i];
+          const rhsPreset = rhsPresets[pkey];
+          const windowPreset: MyType.iWindowPresets = windowPresets[pkey];
+          if (typeof windowPreset !== "undefined") {
+            // if not set or false, check perslice
+            if (typeof windowPreset.perslice === "undefined" || windowPreset.perslice === false) {
+              // if different preset.wl, mark it as perslice
+              if (!windowPreset.wl[0].equal(rhsPreset.wl[0])) {
+                windowPreset.perslice = true;
+                // fill wl array with copy of wl[0]
+                // (loop on number of images minus the existing one)
+                for (let j = 0; j < numberOfImages - 1; ++j) {
+                  windowPreset.wl.push(windowPreset.wl[0]);
+                }
+              }
+            }
+            // store (first) rhs preset.wl if needed
+            if (typeof windowPreset.perslice !== "undefined" && windowPreset.perslice === true) {
+              windowPresets[pkey].wl.splice(fullSliceIndex, 0, rhsPreset.wl[0]);
+            }
+          } else {
+            // if not defined (it should be), store all
+            windowPresets[pkey] = rhsPresets[pkey];
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -448,7 +449,7 @@ export default class MyImage {
    * @param {object} frameBuffer The frame buffer to append.
    * @param {number} frameIndex The frame index.
    */
-  appendFrameBuffer(frameBuffer: myType.tImageBufferType, frameIndex: number) {
+  appendFrameBuffer(frameBuffer: MyType.tImageBufferType, frameIndex: number) {
     // create full buffer if not done yet
     const size = this.getGeometry().getSize();
     const frameSize = this._numberOfComponents * size.getDimSize(2);
@@ -475,7 +476,7 @@ export default class MyImage {
     this.fireEvent({ type: eEventType.event_type_append_frame });
   }
 
-  fireEvent(event: IEventInfo) {
+  fireEvent(event: iEventInfo) {
     this._listenerHandler.fireEvent(event);
   }
 }

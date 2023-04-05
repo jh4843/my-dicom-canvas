@@ -1,4 +1,4 @@
-import * as myType from "@/types";
+import * as MyType from "@/types";
 import * as myUtil from "@/utils";
 import { augmentCallbackEvent } from "@/utils/Event";
 import BaseLoader from "@/components/IO/BaseLoader";
@@ -10,8 +10,8 @@ export default class FileLoader extends BaseLoader {
   // Input Files
   private _inputFiles: Array<File> = [];
   private _fileReaders: Array<FileReader> = [];
-  private _loaders: Array<myType.SubLoader> = [];
-  private _runningLoader: myType.Loader = null;
+  private _loaders: Array<MyType.SubLoader> = [];
+  private _runningLoader: MyType.Loader = null;
 
   private _reservedLoadCount: number = 0;
   private _endLoadCount: number = 0;
@@ -33,7 +33,7 @@ export default class FileLoader extends BaseLoader {
     this._loaders.push(new ImageLoader());
   }
 
-  getLoader(file: File): myType.Loader {
+  getLoader(file: File): MyType.Loader {
     console.log("getLoader: ", this._loaders);
     if (this._loaders == undefined) return null;
 
@@ -53,7 +53,7 @@ export default class FileLoader extends BaseLoader {
   canLoadFile(file: File): boolean {
     const fileType = myUtil.getFileType(file);
 
-    if (fileType > myType.eFileType.file_type_invalid) return true;
+    if (fileType > MyType.eFileType.file_type_invalid) return true;
 
     return false;
   }
@@ -69,7 +69,7 @@ export default class FileLoader extends BaseLoader {
 
     this.insertInputFile(data);
 
-    const evtInfo: myType.IEventInfo = {
+    const evtInfo: MyType.iEventInfo = {
       type: eEventType.event_type_loadstart,
       src: data,
     };
@@ -91,8 +91,12 @@ export default class FileLoader extends BaseLoader {
     let dataElement = data[0];
 
     const loader = this.getLoader(dataElement);
+    const loaderType = loader?.getType();
+    let loaderString = "";
 
-    console.log(`FileLoader::load - select loader `, loader);
+    if (loaderType != undefined) loaderString = MyType.eLoaderObjectType[loaderType];
+
+    console.log(`FileLoader::load - select loader `, loaderString);
 
     if (loader == null) {
       console.log(`FileLoader::load - invalid loader ${typeof loader} ${dataElement} `);
@@ -108,7 +112,7 @@ export default class FileLoader extends BaseLoader {
     if (typeof loader.onloaditem === "undefined") {
       // handle loaditem locally
       console.log("FileLoader::load - local");
-      loader.onload = (event: myType.IEventInfo) => {
+      loader.onload = (event: MyType.iEventInfo) => {
         console.log(`${this.constructor.name}::addLoadItem`, event);
         this.onloaditem(event);
       }; //this.addLoadItem;
@@ -118,7 +122,7 @@ export default class FileLoader extends BaseLoader {
 
       loader.onload = this.addLoadItem;
 
-      // loader.onload = (event: myType.IEventInfo) => {
+      // loader.onload = (event: MyType.iEventInfo) => {
       //   console.log(`${this.constructor.name}::addLoadItem`, event);
       //   this.onloaditem(event);
       // }; //this.addLoadItem;
@@ -134,7 +138,7 @@ export default class FileLoader extends BaseLoader {
     // store loader
     this.storeLoader(loader);
 
-    const getLoadHandler = function (loader: myType.Loader, dataElement: any, i: number) {
+    const getLoadHandler = function (loader: MyType.Loader, dataElement: any, i: number) {
       if (loader == undefined || loader == null) return null;
 
       return function (event: any) {
@@ -174,11 +178,11 @@ export default class FileLoader extends BaseLoader {
       };
 
       // read
-      if (loader.loadFileAs() === myType.eImageContentType.image_content_type_text) {
+      if (loader.loadFileAs() === MyType.eImageContentType.image_content_type_text) {
         reader.readAsText(dataElement);
-      } else if (loader.loadFileAs() === myType.eImageContentType.image_content_type_data_url) {
+      } else if (loader.loadFileAs() === MyType.eImageContentType.image_content_type_data_url) {
         reader.readAsDataURL(dataElement);
-      } else if (loader.loadFileAs() === myType.eImageContentType.image_content_type_array_buffer) {
+      } else if (loader.loadFileAs() === MyType.eImageContentType.image_content_type_array_buffer) {
         reader.readAsArrayBuffer(dataElement);
       }
     }
@@ -204,7 +208,7 @@ export default class FileLoader extends BaseLoader {
   }
 
   // for Loaders
-  storeLoader(loader: myType.Loader) {
+  storeLoader(loader: MyType.Loader) {
     this._runningLoader = loader;
   }
 
@@ -218,7 +222,7 @@ export default class FileLoader extends BaseLoader {
    * @param {object} event The load data event.
    * @private
    */
-  addLoadItem = (event: myType.IEventInfo) => {
+  addLoadItem = (event: MyType.iEventInfo) => {
     console.log(`${this.constructor.name}::addLoadItem`, event);
     this.onloaditem(event);
     //this.addLoad();
@@ -231,7 +235,7 @@ export default class FileLoader extends BaseLoader {
    * @param {object} _event The load data event.
    * @private
    */
-  addLoad = (event: myType.IEventInfo) => {
+  addLoad = (event: MyType.iEventInfo) => {
     console.log(`FileLoader::addLoad`, event);
     // this._reservedLoadCount++;
     // if (this._reservedLoadCount === this._inputFiles.length) {
@@ -248,7 +252,7 @@ export default class FileLoader extends BaseLoader {
    * @param {object} _event The load end event.
    * @private
    */
-  addLoadend = (_event: myType.IEventInfo) => {
+  addLoadend(_event: MyType.iEventInfo) {
     console.log(`FileLoader::addLoadend`, this._endLoadCount);
     this._endLoadCount++;
     // call self.onloadend when all is run
@@ -260,7 +264,7 @@ export default class FileLoader extends BaseLoader {
         src: this._inputFiles,
       });
     }
-  };
+  }
 
   /**
    * Handle a load start event.
@@ -269,14 +273,14 @@ export default class FileLoader extends BaseLoader {
    * @param {object} _event The load start event.
    */
 
-  onloadstart = (_event: myType.IEventInfo) => {};
+  onloadstart(_event: MyType.iEventInfo) {}
   /**
    * Handle a load progress event.
    * Default does nothing.
    *
    * @param {object} _event The progress event.
    */
-  onprogress = (_event: myType.IEventInfo) => {};
+  onprogress(_event: MyType.iEventInfo) {}
   /**
    * Handle a load item event.
    * Default does nothing.
@@ -284,7 +288,7 @@ export default class FileLoader extends BaseLoader {
    * @param {object} _event The load item event fired
    *   when a file item has been loaded successfully.
    */
-  onloaditem = (_event: myType.IEventInfo) => {};
+  onloaditem(_event: MyType.iEventInfo) {}
   /**
    * Handle a load event.
    * Default does nothing.
@@ -292,7 +296,7 @@ export default class FileLoader extends BaseLoader {
    * @param {object} _event The load event fired
    *   when a file has been loaded successfully.
    */
-  onload = (_event: myType.IEventInfo) => {};
+  onload(_event: MyType.iEventInfo) {}
   /**
    * Handle a load end event.
    * Default does nothing.
@@ -300,19 +304,19 @@ export default class FileLoader extends BaseLoader {
    * @param {object} _event The load end event fired
    *  when a file load has completed, successfully or not.
    */
-  onloadend = (_event: myType.IEventInfo) => {};
+  onloadend(_event: MyType.iEventInfo) {}
   /**
    * Handle an error event.
    * Default does nothing.
    *
    * @param {object} _event The error event.
    */
-  onerror = (_event: myType.IEventInfo) => {};
+  onerror(_event: MyType.iEventInfo) {}
   /**
    * Handle an abort event.
    * Default does nothing.
    *
    * @param {object} _event The abort event.
    */
-  onabort = (_event: myType.IEventInfo) => {};
+  onabort(_event: MyType.iEventInfo) {}
 }

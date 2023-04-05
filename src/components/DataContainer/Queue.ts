@@ -1,10 +1,10 @@
-export interface IQueue<T> {
+export interface iQueue<T> {
   enQueue(item: T): void;
   deQueue(): T | undefined;
   size(): number;
 }
 
-class Queue<T> implements IQueue<T> {
+class Queue<T> implements iQueue<T> {
   private _storage: T[] = [];
 
   constructor(private capacity: number = Infinity) {}

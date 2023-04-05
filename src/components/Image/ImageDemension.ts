@@ -1,13 +1,13 @@
-import type * as myType from "@/types";
+import type * as MyType from "@/types";
 
 export default class ImageDemension {
-  private _imageDimension: myType.eImageDimension;
+  private _imageDimension: MyType.eImageDimension;
 
-  constructor(dimension: myType.eImageDimension) {
+  constructor(dimension: MyType.eImageDimension) {
     this._imageDimension = dimension;
   }
 
-  public get imageDimension(): myType.eImageDimension {
+  public get imageDimension(): MyType.eImageDimension {
     return this._imageDimension;
   }
 }

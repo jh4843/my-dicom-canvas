@@ -1,6 +1,6 @@
-import BaseLoader, { eLoaderStatus } from "@/components/IO/BaseLoader";
+import BaseLoader from "@/components/IO/BaseLoader";
 import * as myUtil from "@/utils";
-import * as myType from "@/types";
+import * as MyType from "@/types";
 import DomReader from "../Image/DomReader";
 
 export default class ImageLoader extends BaseLoader {
@@ -8,22 +8,24 @@ export default class ImageLoader extends BaseLoader {
     super();
   }
 
+  getType(): MyType.eLoaderObjectType {
+    return MyType.eLoaderObjectType.loader_object_type_image;
+  }
+
   canLoadFile(file: File): boolean {
     const fileType = myUtil.getFileType(file);
 
-    if (fileType == myType.eFileType.file_type_raster_image) return true;
+    if (fileType == MyType.eFileType.file_type_raster_image) return true;
 
     return false;
   }
 
-  loadFileAs(): myType.eImageContentType {
-    console.log("loadFileAs");
-    return myType.eImageContentType.image_content_type_data_url;
+  loadFileAs(): MyType.eImageContentType {
+    return MyType.eImageContentType.image_content_type_data_url;
   }
 
-  loadUrlAs(): myType.eImageContentType {
-    console.log("loadUrlAs");
-    return myType.eImageContentType.image_content_type_array_buffer;
+  loadUrlAs(): MyType.eImageContentType {
+    return MyType.eImageContentType.image_content_type_array_buffer;
   }
 
   createDataUri(response: any, dataType: string) {
@@ -47,14 +49,14 @@ export default class ImageLoader extends BaseLoader {
   load(buffer: object, origin: string, index: number) {
     console.log(`ImageLoader::load `, origin, index);
 
-    this.loadStatus = eLoaderStatus.loader_status_loadstart;
+    this.loadStatus = MyType.eLoaderStatus.loader_status_loadstart;
 
     const image = new Image();
 
     image.onload = () => {
       console.log(`ImageLoader::image.onload `, this.loadStatus);
 
-      if (this.loadStatus != eLoaderStatus.loader_status_aborted) {
+      if (this.loadStatus != MyType.eLoaderStatus.loader_status_aborted) {
         this.onprogress({
           lengthComputable: true,
           loaded: 100,
@@ -79,7 +81,7 @@ export default class ImageLoader extends BaseLoader {
   }
 
   abort() {
-    this.loadStatus = eLoaderStatus.loader_status_aborted;
+    this.loadStatus = MyType.eLoaderStatus.loader_status_aborted;
 
     this.onabort({});
     this.onloadend({});

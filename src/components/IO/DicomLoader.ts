@@ -1,10 +1,21 @@
 import BaseLoader from "@/components/IO/BaseLoader";
+import DicomParseManager from "./DicomParseManager";
 import * as myUtil from "@/utils";
-import * as myType from "@/types";
+import * as MyType from "@/types";
 
 export default class DicomLoader extends BaseLoader {
+  private _isLoading: boolean = false;
+  private _dicomParseManager: DicomParseManager;
+
   constructor() {
     super();
+
+    this._isLoading = false;
+    this._dicomParseManager = new DicomParseManager();
+  }
+
+  getType(): MyType.eLoaderObjectType {
+    return MyType.eLoaderObjectType.loader_object_type_dicom;
   }
 
   canLoadFile(file: File): boolean {
@@ -12,17 +23,17 @@ export default class DicomLoader extends BaseLoader {
 
     console.log(`FileLoader::canLoadFile`, fileType);
 
-    if (fileType == myType.eFileType.file_type_dicom) return true;
+    if (fileType == MyType.eFileType.file_type_dicom) return true;
 
     return false;
   }
 
-  loadFileAs(): myType.eImageContentType {
-    return myType.eImageContentType.image_content_type_array_buffer;
+  loadFileAs(): MyType.eImageContentType {
+    return MyType.eImageContentType.image_content_type_array_buffer;
   }
 
-  loadUrlAs(): myType.eImageContentType {
-    return myType.eImageContentType.image_content_type_array_buffer;
+  loadUrlAs(): MyType.eImageContentType {
+    return MyType.eImageContentType.image_content_type_array_buffer;
   }
 
   /**
@@ -32,29 +43,43 @@ export default class DicomLoader extends BaseLoader {
    * @param {string} origin The data origin.
    * @param {number} index The data index.
    */
-  load(buffer: object, origin: string, index: number) {
+  load(buffer: ArrayBufferLike, origin: string, index: number) {
     // setup db2v ony once
-    if (!isLoading) {
+    if (!this._isLoading) {
       // pass options
-      db2v.setOptions(options);
+      this._dicomParseManager.setOptions(this._options);
       // connect handlers
-      db2v.onloadstart = self.onloadstart;
-      db2v.onprogress = self.onprogress;
-      db2v.onloaditem = self.onloaditem;
-      db2v.onload = self.onload;
-      db2v.onloadend = function (event) {
+      this._dicomParseManager.onloadstart = this.onloadstart;
+      this._dicomParseManager.onprogress = this.onprogress;
+      this._dicomParseManager.onloaditem = this.onloaditem;
+      this._dicomParseManager.onload = this.onload;
+      this._dicomParseManager.onloadend = (event: MyType.iEventInfo) => {
         // reset loading flag
-        isLoading = false;
+        this._isLoading = false;
         // call listeners
-        self.onloadend(event);
+        this.onloadend(event);
       };
-      db2v.onerror = self.onerror;
-      db2v.onabort = self.onabort;
+      this._dicomParseManager.onerror = this.onerror;
+      this._dicomParseManager.onabort = this.onabort;
     }
 
     // set loading flag
-    isLoading = true;
+    this._isLoading = true;
     // convert
-    db2v.convert(buffer, origin, index);
+    this._dicomParseManager.convert(buffer, origin, index);
   }
+
+  onloadstart(_event: MyType.iEventInfo) {}
+
+  onloaditem(_event: MyType.iEventInfo) {}
+
+  onprogress(_event: MyType.iEventInfo) {}
+
+  onload(_event: MyType.iEventInfo) {}
+
+  onloadend(_event: MyType.iEventInfo) {}
+
+  onerror(_event: MyType.iEventInfo) {}
+
+  onabort(_event: MyType.iEventInfo) {}
 }

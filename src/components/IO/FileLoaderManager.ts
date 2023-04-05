@@ -1,19 +1,19 @@
-import type { ILoaderOptions } from "@/components/IO/BaseLoader";
+import type * as MyType from "@/types";
 import FileLoader from "@/components/IO/FileLoader";
 import { augmentCallbackEvent } from "@/utils/Event";
-import { eEventLoadType, type IEventInfo } from "@/types/Event";
+import { eEventLoadType, type iEventInfo } from "@/types/Event";
 
-export interface ILoaderController {
-  onloadstart(_event: IEventInfo): void;
-  onprogress(_event: IEventInfo): void;
-  onloaditem(_event: IEventInfo): void;
-  onload(_event: IEventInfo): void;
-  onloadend(_event: IEventInfo): void;
-  onerror(_event: IEventInfo): void;
-  onabort(_event: IEventInfo): void;
+export interface iLoaderController {
+  onloadstart(_event: iEventInfo): void;
+  onprogress(_event: iEventInfo): void;
+  onloaditem(_event: iEventInfo): void;
+  onload(_event: iEventInfo): void;
+  onloadend(_event: iEventInfo): void;
+  onerror(_event: iEventInfo): void;
+  onabort(_event: iEventInfo): void;
 }
 
-export default class FileLoaderManager implements ILoaderController {
+export default class FileLoaderManager implements iLoaderController {
   private _currentLoaders: Array<Object>;
   private _countForId: number;
   private _lastDate: Date;
@@ -71,7 +71,7 @@ export default class FileLoaderManager implements ILoaderController {
     this.loadFileData(fileArray, fileIO, eEventLoadType.event_load_type_state);
   }
 
-  loadFileData(data: Array<File>, loader: FileLoader, loadType: eEventLoadType, options?: ILoaderOptions) {
+  loadFileData(data: Array<File>, loader: FileLoader, loadType: eEventLoadType, options?: MyType.iLoaderOptions) {
     const loadId = this.getNextLoadId();
 
     loader.onloadstart = (event) => {
@@ -135,7 +135,7 @@ export default class FileLoaderManager implements ILoaderController {
    * @param {object} _event The load start event.
    */
 
-  onloadstart(_event: IEventInfo) {
+  onloadstart(_event: iEventInfo) {
     console.log(_event);
   }
   /**
@@ -144,7 +144,7 @@ export default class FileLoaderManager implements ILoaderController {
    *
    * @param {object} _event The progress event.
    */
-  onprogress(_event: IEventInfo) {
+  onprogress(_event: iEventInfo) {
     console.log(_event);
   }
   /**
@@ -154,7 +154,7 @@ export default class FileLoaderManager implements ILoaderController {
    * @param {object} _event The load item event fired
    *   when a file item has been loaded successfully.
    */
-  onloaditem(_event: IEventInfo) {
+  onloaditem(_event: iEventInfo) {
     console.log(_event);
   }
   /**
@@ -164,7 +164,7 @@ export default class FileLoaderManager implements ILoaderController {
    * @param {object} _event The load event fired
    *   when a file has been loaded successfully.
    */
-  onload(_event: IEventInfo) {
+  onload(_event: iEventInfo) {
     console.log(_event);
   }
   /**
@@ -174,7 +174,7 @@ export default class FileLoaderManager implements ILoaderController {
    * @param {object} _event The load end event fired
    *  when a file load has completed, successfully or not.
    */
-  onloadend(_event: IEventInfo) {
+  onloadend(_event: iEventInfo) {
     console.log(_event);
   }
   /**
@@ -183,7 +183,7 @@ export default class FileLoaderManager implements ILoaderController {
    *
    * @param {object} _event The error event.
    */
-  onerror(_event: IEventInfo) {
+  onerror(_event: iEventInfo) {
     console.log(_event);
   }
   /**
@@ -192,7 +192,7 @@ export default class FileLoaderManager implements ILoaderController {
    *
    * @param {object} _event The abort event.
    */
-  onabort(_event: IEventInfo) {
+  onabort(_event: iEventInfo) {
     console.log(_event);
   }
 }

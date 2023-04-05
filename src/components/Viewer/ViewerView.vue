@@ -31,9 +31,12 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, reactive, computed } from "vue";
+import { onMounted, ref, reactive, computed, watch } from "vue";
 import { CommonImage, eImageSourceType } from "@/types/Image";
 import { CommonCanvas } from "@/types/Canvas";
+import { Point2D } from "@/math/Point";
+import type MyImage from "@/components/Image/MyImage";
+import type * as MyType from "@/types";
 import FileLoaderManager from "@/components/IO/FileLoaderManager";
 
 interface Props {
@@ -44,12 +47,14 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  canvasWidth: 300,
+  canvasWidth: 360,
   canvasHeight: 500,
   initFilePath: undefined,
 
   //initFilePath: "file:///C:/Users/2017387/Pictures/Logo.png",
 });
+
+var c = document.getElementById("viewer-canvas");
 
 const curPointPositionX = ref(0);
 const curPointPositionY = ref(0);
@@ -84,8 +89,6 @@ const showDropbox = (show: boolean): void => {
 
   imageInfo.info.type = eImageSourceType.image_source_type_img_file;
   imageInfo.info.name = "";
-
-  console.log("showDropBox", show, isOpenedDicomFile.value);
 
   const boxContainer = document.getElementById("viewer-drop-box-container");
   const box = document.getElementById("viewer-drop-box");
@@ -152,7 +155,7 @@ const onSelectedFile = (e: Event) => {
   e.stopPropagation();
   e.preventDefault();
 
-  console.log("onSelectedFile: ", e.constructor.name);
+  showDropbox(false);
 
   if (e == undefined || e.target == undefined || e.target.files.length < 1) return;
 
@@ -166,11 +169,48 @@ const onSelectedFile = (e: Event) => {
       return;
     }
 
-    loadImage(event.src);
-    console.log("onloadend) complete", event);
-  };
+    draw(event);
 
-  console.log("onSelectedFile: ", e.constructor.name, e, e.target.files[0]);
+    //loadImage(event.src);
+  };
+};
+
+const draw = (event) => {
+  let mainCanvasElement = canvasElement.value as HTMLCanvasElement | null;
+  let ctxMainCanvasElement = mainCanvasElement?.getContext("2d");
+
+  let myImage: MyImage | undefined = event.data?.image;
+  let imageInfo: MyType.iImageMetaInfo | undefined = event.data?.info;
+
+  if (ctxMainCanvasElement == undefined || myImage == undefined || imageInfo == undefined || myImage.buffer == null) {
+    console.log("onloadend) invalid src", mainCanvasElement, ctxMainCanvasElement, myImage, imageInfo);
+    return;
+  }
+
+  let dataLen = imageInfo.imageWidth * imageInfo.imageHeight * 4;
+
+  const displayBuffer = new Uint8ClampedArray(dataLen);
+
+  let index = 0;
+  for (let i = 0; i < dataLen; i += 4) {
+    index = i - i / 4;
+    displayBuffer[i] = myImage.buffer[index];
+    displayBuffer[i + 1] = myImage.buffer[index + 1];
+    displayBuffer[i + 2] = myImage.buffer[index + 2];
+    displayBuffer[i + 3] = 255;
+  }
+
+  const imgData = new ImageData(displayBuffer, imageInfo.imageWidth, imageInfo.imageHeight);
+
+  const ptCanvasCenter = new Point2D(canvasInfo.width / 2, canvasInfo.height / 2);
+  const ptLeftTop = new Point2D(
+    ptCanvasCenter.x - imageInfo.imageWidth / 2,
+    ptCanvasCenter.y - imageInfo.imageHeight / 2
+  );
+
+  ctxMainCanvasElement?.putImageData(imgData, ptLeftTop.x, ptLeftTop.y);
+
+  console.log("draw) complete", imgData, imageInfo.imageWidth, imageInfo.imageHeight, ptLeftTop, ptCanvasCenter);
 };
 
 const onDragOverImage = (e: DragEvent) => {
@@ -195,6 +235,9 @@ const loadLocalFile = (file: string) => {
 
 const loadImage = (src: File) => {
   const reader = new FileReader();
+
+  console.log("loadImage: ", refCanvasElement);
+
   reader.addEventListener("load", (event) => {
     console.log("Loaded: ", event);
     let img = new Image();
@@ -206,6 +249,7 @@ const loadImage = (src: File) => {
       }
     }
     showDropbox(false);
+
     img.onload = function () {
       drawImage(img);
     };
@@ -217,8 +261,6 @@ const loadImage = (src: File) => {
 };
 
 const drawImage = (img: HTMLImageElement) => {
-  console.log("draw Image: ", img.constructor.name);
-
   imageInfo.info.type = eImageSourceType.image_source_type_img_file;
   imageInfo.info.name = img.src;
 
@@ -234,6 +276,8 @@ const drawImage = (img: HTMLImageElement) => {
 
   let mainCanvasElement = canvasElement.value as HTMLCanvasElement | null;
   let ctxMainCanvasElement = mainCanvasElement?.getContext("2d");
+
+  console.log("draw Image: ", refCanvasElement, canvasElement);
 
   if (mainCanvasElement == undefined) {
     return;
@@ -261,6 +305,8 @@ const drawImage = (img: HTMLImageElement) => {
   let width = imageInfo.info.width * ratio;
   let height = imageInfo.info.height * ratio;
 
+  console.log("drawImage: ", imageInfo.info.width, imageInfo.info.height, ratio, width, height);
+
   if (ctxMainCanvasElement != undefined && ctxMainCanvasElement != null) {
     ctxMainCanvasElement.drawImage(
       img,
@@ -276,11 +322,10 @@ const drawImage = (img: HTMLImageElement) => {
 
     imageInfo.data = ctxMainCanvasElement.getImageData(0, 0, imageInfo.info.width, imageInfo.info.height);
 
-    console.log("draw: ", imageInfo.info.width, imageInfo.info.height, imageInfo.data);
+    //var dataURI = mainCanvasElement?.toDataURL("image/jpeg");
+    //console.log("Draw image: ", imageInfo.info.width, imageInfo.info.height, ratio, dataURI);
 
-    var dataURI = mainCanvasElement?.toDataURL("image/jpeg");
-
-    console.log("Draw image: ", imageInfo.info.width, imageInfo.info.height, ratio, dataURI);
+    console.log("Draw image: ", imageInfo.info.width, imageInfo.info.height, ratio);
   }
 };
 

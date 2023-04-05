@@ -1,4 +1,4 @@
-import * as myType from "@/types";
+import * as MyType from "@/types";
 import ImageDemension from "./ImageDemension";
 
 export default class ImageSpacing extends ImageDemension {
@@ -7,7 +7,7 @@ export default class ImageSpacing extends ImageDemension {
   private _z?: number; // for 3D
 
   constructor(x: number, y: number, z?: number) {
-    super(z == undefined ? myType.eImageDimension.image_dimension_2d : myType.eImageDimension.image_dimension_3d);
+    super(z == undefined ? MyType.eImageDimension.image_dimension_2d : MyType.eImageDimension.image_dimension_3d);
 
     this._x = x;
     this._y = y;
@@ -52,7 +52,7 @@ export default class ImageSpacing extends ImageDemension {
 
     if (this.y != size.y) return false;
 
-    if (this.imageDimension == myType.eImageDimension.image_dimension_3d) {
+    if (this.imageDimension == MyType.eImageDimension.image_dimension_3d) {
       if (this.z != size.z) return false;
     }
 
