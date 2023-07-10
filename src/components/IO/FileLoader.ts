@@ -60,7 +60,7 @@ export default class FileLoader extends BaseLoader {
 
   // Load
   load(data: Array<File>) {
-    console.log(`FileLoader::onloaditem: `, data);
+    console.log("FileLoader::onloaditem: ", data);
 
     // check input
     if (typeof data === "undefined" || data.length === 0) {
@@ -96,7 +96,7 @@ export default class FileLoader extends BaseLoader {
 
     if (loaderType != undefined) loaderString = MyType.eLoaderObjectType[loaderType];
 
-    console.log(`FileLoader::load - select loader `, loaderString);
+    console.log("FileLoader::load - select loader ", loaderString);
 
     if (loader == null) {
       console.log(`FileLoader::load - invalid loader ${typeof loader} ${dataElement} `);
@@ -121,17 +121,23 @@ export default class FileLoader extends BaseLoader {
       console.log("FileLoader::load - remote");
 
       loader.onload = this.addLoadItem;
-
-      // loader.onload = (event: MyType.iEventInfo) => {
-      //   console.log(`${this.constructor.name}::addLoadItem`, event);
-      //   this.onloaditem(event);
-      // }; //this.addLoadItem;
       loader.onloaditem = this.addLoad;
-
-      // loader.onloaditem = this.onloaditem;
-      // loader.onload = this.addLoad;
     }
-    loader.onloadend = this.addLoadend;
+    loader.onloadend = (_event: MyType.iEventInfo) => {
+      this._endLoadCount++;
+
+      console.log("FileLoader::addLoadend", _event, this._endLoadCount);
+      // call self.onloadend when all is run
+      // (not using the input event since it is not the
+      //   general load end)
+      // x2 to count for reader + load
+      if (this._endLoadCount == 2 * this._inputFiles.length) {
+        this.onloadend({
+          src: this._inputFiles,
+        });
+      }
+    };
+
     loader.onerror = this.onerror;
     loader.onabort = this.onabort;
 
@@ -236,7 +242,7 @@ export default class FileLoader extends BaseLoader {
    * @private
    */
   addLoad = (event: MyType.iEventInfo) => {
-    console.log(`FileLoader::addLoad`, event);
+    console.log("FileLoader::addLoad", event);
     // this._reservedLoadCount++;
     // if (this._reservedLoadCount === this._inputFiles.length) {
     //   this.onload({
@@ -252,19 +258,7 @@ export default class FileLoader extends BaseLoader {
    * @param {object} _event The load end event.
    * @private
    */
-  addLoadend(_event: MyType.iEventInfo) {
-    console.log(`FileLoader::addLoadend`, this._endLoadCount);
-    this._endLoadCount++;
-    // call self.onloadend when all is run
-    // (not using the input event since it is not the
-    //   general load end)
-    // x2 to count for reader + load
-    if (this._endLoadCount === 2 * this._inputFiles.length) {
-      this.onloadend({
-        src: this._inputFiles,
-      });
-    }
-  }
+  addLoadend = (_event: MyType.iEventInfo) => {};
 
   /**
    * Handle a load start event.

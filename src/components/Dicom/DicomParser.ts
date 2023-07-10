@@ -15,6 +15,7 @@ export class DefaultTextDecoder {
   private _decode;
 
   get decode() {
+    console.log("DefaultTextDecoder::docode", this._decode);
     return this._decode;
   }
 
@@ -24,6 +25,9 @@ export class DefaultTextDecoder {
       for (let i = 0, leni = buffer.length; i < leni; ++i) {
         result += String.fromCharCode(buffer[i]);
       }
+
+      console.log("DefaultTextDecoder::_decode - ", buffer, "\nres: ", result);
+
       return result;
     };
   }
@@ -109,8 +113,8 @@ export default class DicomParser {
     const metaReader = new DataReader(buffer);
     let dataReader = new DataReader(buffer);
 
-    console.log("DicomParser parse[metaReader]: ", metaReader);
-    console.log("DicomParser parse[DataReader]: ", dataReader);
+    console.log("Created DicomParser parse: ", metaReader, dataReader);
+    //console.log("DicomParser parse[DataReader]: ", dataReader);
 
     // 128 -> 132: magic word
     offset = 128;
@@ -314,10 +318,12 @@ export default class DicomParser {
 
   // Prototype
   getRawDicomElements(): tDicomElement[] {
+    console.log("getRawDicomElements - ", this._dicomElements);
     return this._dicomElements;
   }
 
   getDicomElements(): DicomDS {
+    console.log("getDicomElements - ", this._dicomElements);
     return new DicomDS(this._dicomElements);
   }
 
@@ -554,16 +560,18 @@ export default class DicomParser {
     reader: DataReader,
     pixelRepresentation?: number,
     bitsAllocated?: number
-  ): tElementValueType {
+  ): tElementValueType | null {
     const tag = element.tag;
     const vl = element.vl ? element.vl : 0;
     const vr = element.vr;
     const offset = element.startOffset ? element.startOffset : 0;
 
+    console.log("DicomParser::interpretElement - el:", element, vl, vr);
+
     // data
-    let data = null;
+    let data = [];
     const isPixelData = isPixelDataTag(tag);
-    const vrType = MyType.vrType[vr];
+    const vrType: tElementValueType = MyType.vrType[vr];
     if (isPixelData) {
       if (element.undefinedLength) {
         // implicit pixel data sequence
@@ -706,8 +714,6 @@ export default class DicomParser {
     } else {
       console.log("Unknown VR: " + vr);
     }
-
-    if (data == null || data == undefined) return null;
 
     return data;
   }

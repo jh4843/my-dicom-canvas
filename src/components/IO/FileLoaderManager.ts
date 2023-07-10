@@ -75,7 +75,7 @@ export default class FileLoaderManager implements iLoaderController {
     const loadId = this.getNextLoadId();
 
     loader.onloadstart = (event) => {
-      console.log(`FileLoaderManager::onloadstart `, event);
+      console.log("FileLoaderManager::onloadstart ", event);
 
       // store loader to allow abort
       this._currentLoaders[loadId] = {
@@ -87,27 +87,27 @@ export default class FileLoaderManager implements iLoaderController {
     };
 
     loader.onprogress = (event) => {
-      console.log(`FileLoaderManager::::onprogress `, event);
+      console.log("FileLoaderManager::onprogress ", event);
       this.onloadstart(event);
     };
 
     loader.onloaditem = (event) => {
-      console.log(`FileLoaderManager::onloaditem `, event);
+      console.log("FileLoaderManager::onloaditem ", event);
       this.onloadend(event);
     };
 
     loader.onerror = (event) => {
-      console.log(`FileLoaderManager::onerror: `, event);
+      console.log("FileLoaderManager::onerror: ", event);
       this.onerror(event);
     };
     loader.onabort = (event) => {
-      console.log(`FileLoaderManager::onabort: `, event);
+      console.log("FileLoaderManager::onabort: ", event);
       this.onabort(event);
     };
 
     // launch load
     try {
-      console.log(`FileLoaderManager::loader::load: `, data);
+      console.log("FileLoaderManager::loader::load: ", data);
       loader.setOptions(options);
       loader.load(data);
     } catch (error) {

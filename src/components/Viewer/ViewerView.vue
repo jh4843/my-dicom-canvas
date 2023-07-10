@@ -31,13 +31,13 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, reactive, computed, watch } from "vue";
-import { CommonImage, eImageSourceType } from "@/types/Image";
-import { CommonCanvas } from "@/types/Canvas";
-import { Point2D } from "@/math/Point";
-import type MyImage from "@/components/Image/MyImage";
-import type * as MyType from "@/types";
 import FileLoaderManager from "@/components/IO/FileLoaderManager";
+import type MyImage from "@/components/Image/MyImage";
+import { Point2D } from "@/math/Point";
+import type * as MyType from "@/types";
+import { CommonCanvas } from "@/types/Canvas";
+import { CommonImage, eImageSourceType } from "@/types/Image";
+import { computed, onMounted, reactive, ref } from "vue";
 
 interface Props {
   canvasWidth?: number;
@@ -160,6 +160,8 @@ const onSelectedFile = (e: Event) => {
   if (e == undefined || e.target == undefined || e.target.files.length < 1) return;
 
   const fileLoaderManager = new FileLoaderManager();
+
+  console.log("files: ", e.target.files);
 
   fileLoaderManager.loadFiles(e.target.files);
 
@@ -334,33 +336,52 @@ const onDropImage = (e: DragEvent) => {
   e.stopPropagation();
   e.preventDefault();
 
-  const reader = new FileReader();
+  showDropbox(false);
 
-  reader.addEventListener("load", (event) => {
-    console.log("Loaded: ", event);
+  if (e == undefined || e.dataTransfer == undefined) return;
 
-    let img = new Image();
+  const fileLoaderManager = new FileLoaderManager();
 
-    if (reader.result != null) {
-      if (typeof reader.result === "string") {
-        img.src = reader.result;
-        console.log("img: ", img);
-      } else {
-        console.log("type error: ", reader.result);
-      }
+  console.log("files: ", e.dataTransfer.files);
+
+  fileLoaderManager.loadFiles(e.dataTransfer.files);
+
+  fileLoaderManager.onloadend = (event) => {
+    if (event.src == undefined) {
+      console.log("onloadend) invalid src", event.src);
+      return;
     }
 
-    showDropbox(false);
+    draw(event);
+  };
 
-    img.onload = function () {
-      drawImage(img);
-    };
-  });
+  // const reader = new FileReader();
 
-  if (e.dataTransfer != undefined && e.dataTransfer.files.length > 0) {
-    reader.readAsDataURL(e.dataTransfer.files[0]);
-    console.log("file name: ", e.dataTransfer.files[0].name);
-  }
+  // reader.addEventListener("load", (event) => {
+  //   console.log("Loaded: ", event);
+
+  //   let img = new Image();
+
+  //   if (reader.result != null) {
+  //     if (typeof reader.result === "string") {
+  //       img.src = reader.result;
+  //       console.log("img: ", img);
+  //     } else {
+  //       console.log("type error: ", reader.result);
+  //     }
+  //   }
+
+  //   showDropbox(false);
+
+  //   img.onload = function () {
+  //     drawImage(img);
+  //   };
+  // });
+
+  // if (e.dataTransfer != undefined && e.dataTransfer.files.length > 0) {
+  //   reader.readAsDataURL(e.dataTransfer.files[0]);
+  //   console.log("file name: ", e.dataTransfer.files[0].name);
+  // }
 
   //showDropbox(false);
 };

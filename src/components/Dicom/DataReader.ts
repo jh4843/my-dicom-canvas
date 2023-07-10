@@ -6,7 +6,7 @@ import * as MyType from "@/types";
  */
 export const isNativeLittleEndian = () => {
   const temp = new Int16Array([1]);
-  console.log("isNativeLittleEndian", temp);
+  console.log("DataReader::isNativeLittleEndian if[0]:1 -> Little endian", temp);
   return new Int8Array(temp.buffer)[0] > 0;
 };
 
@@ -109,6 +109,7 @@ export default class DataReader {
   }
 
   readUint8Array(byteOffset: number, size: number): Uint8Array {
+    console.log("DataReader::readUint8Array: ", byteOffset, size);
     return new Uint8Array(this._buffer, byteOffset, size);
   }
 
